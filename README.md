@@ -1,6 +1,6 @@
 # speech-act
 
-This repository contains code of our journal [Computational Linguistics - Special Issue on Language in Social Media, Exploiting discourse and other contextual information] paper - Modeling Speech Acts in Asynchronous Conversations: A Neural-CRF Approach.
+This repository contains code of our journal [Computational Linguistics - Special Issue on Language in Social Media, Exploiting discourse and other contextual information] paper entitled **Modeling Speech Acts in Asynchronous Conversations: A Neural-CRF Approach**.
  
 Software Requirements
 ---------------------
