@@ -35,11 +35,11 @@ def forward_propagation_bidirectional(input_data, sequence_lengths, E):
 
         (c_fw, h_fw) = state_fw
         (c_bw, h_bw) = state_bw
-        print("c_fw: ", c_fw.shape)
-        print("c_bw: ", c_bw.shape)
+        print("h_fw: ", h_fw.shape)
+        print("h_bw: ", h_bw.shape)
 
-        c = tf.concat([c_fw, c_bw], axis=-1)
-        print("c: ", c.shape)
+        h = tf.concat([h_fw, h_bw], axis=-1)
+        print("h: ", h.shape)
 
     elif options.recur_type=='gru':
         cell_fw = tf.contrib.rnn.GRUCell(options.hidden_size)
@@ -53,14 +53,14 @@ def forward_propagation_bidirectional(input_data, sequence_lengths, E):
         print("state_fw: ", state_fw.shape)
         print("state_bw: ", state_bw.shape)
 
-        c = tf.concat([state_fw, state_bw], axis=-1)
-        print("c: ", c.shape)
+        h = tf.concat([state_fw, state_bw], axis=-1)
+        print("h: ", h.shape)
 
     weight = tf.get_variable("w", shape=[options.hidden_size + options.hidden_size, options.numClasses],
                              initializer=tf.contrib.layers.xavier_initializer(seed=101))
     bias = tf.get_variable("b", shape=[options.numClasses], initializer=tf.constant_initializer(0.0))
 
-    prediction = (tf.matmul(c, weight) + bias)
+    prediction = (tf.matmul(h, weight) + bias)
 
     return prediction
 
@@ -86,7 +86,7 @@ def forward_propagation_unidirectional(input_data, sequence_lengths, E):
                              initializer=tf.contrib.layers.xavier_initializer(seed=101))
     bias = tf.get_variable("b", shape=[options.numClasses], initializer=tf.constant_initializer(0.0))
 
-    prediction = (tf.matmul(c, weight) + bias)
+    prediction = (tf.matmul(h, weight) + bias)
 
     return prediction
 
@@ -310,11 +310,11 @@ if __name__ == '__main__':
         best_minibatch = -1
         for epoch in range(options.epochs):
             # randomly shuffle the training data
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(X_train)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(y_train)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(sequence_len['train_seq_len'])
             minibatch_cost = 0.
             num_minibatches = int(m / options.minibatch_size)

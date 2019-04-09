@@ -53,11 +53,11 @@ class dannModel(object):
 
             (c_fw, h_fw) = state_fw
             (c_bw, h_bw) = state_bw
-            print("c_fw: ", c_fw.shape)
-            print("c_bw: ", c_bw.shape)
+            print("h_fw: ", h_fw.shape)
+            print("h_bw: ", h_bw.shape)
 
             # The domain-invariant features
-            self.feature = tf.concat([c_fw, c_bw], axis=-1)
+            self.feature = tf.concat([h_fw, h_bw], axis=-1)
             print("feature shape: ", self.feature.shape)
 
         # MLP for class prediction
@@ -68,20 +68,14 @@ class dannModel(object):
             source_features = tf.slice(self.feature, [0, 0], [options.minibatch_size // 2, -1])
             print("All features: ", all_features.shape)
             print("source features: ", source_features.shape)
-            if self.train==True:
-                classify_feats = source_features
-            else:
-                classify_feats = all_features
+            classify_feats = tf.cond(self.train, lambda: source_features, lambda: all_features)
             
             all_labels = self.y
             source_labels = tf.slice(self.y, [0, 0], [options.minibatch_size // 2, -1])
             print("All labels: ", all_labels.shape)
             print("source labels: ", source_labels.shape)
-            if self.train==True:
-                self.classify_labels = source_labels
-            else:
-                self.classify_labels = all_labels
-            
+            self.classify_labels = tf.cond(self.train, lambda: source_labels, lambda: all_labels)
+
             weight = tf.get_variable("l_w1",
                                      shape=[options.hidden_size + options.hidden_size, options.numClasses],
                                      initializer=tf.contrib.layers.xavier_initializer(seed=101))
@@ -257,22 +251,22 @@ if __name__ == '__main__':
         best_minibatch = -1
         for epoch in range(options.epochs):
             # randomly shuffle the source data
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(X_src)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(y_src)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(sequence_len['src_seq_len'])
             src_minibatches = mini_batches(X_src, y_src, seq_len=sequence_len['src_seq_len'],
                                            mini_batch_size=options.minibatch_size // 2)
             src_num_minibatches = len(src_minibatches)
 
             # randomly shuffle the target training data
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(X_train)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(y_train)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(sequence_len['train_seq_len'])
             target_train_minibatches = mini_batches(X_train, y_train, seq_len=sequence_len['train_seq_len'],
                                                     mini_batch_size=options.minibatch_size // 2)

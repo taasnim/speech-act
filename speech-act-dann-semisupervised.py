@@ -71,20 +71,16 @@ class dannModel(object):
             print("All features: ", all_features.shape)
             print("source features: ", source_features.shape)
             print("target labeled features: ", target_labeled_features.shape)
-            if self.train==True:
-                classify_feats = tf.concat([source_features, target_labeled_features], 0)
-            else:
-                classify_feats = all_features
+            classify_feats = tf.cond(self.train, lambda: source_features, lambda: all_features)
+
             all_labels = self.y
             source_labels = tf.slice(self.y, [0, 0], [options.minibatch_size // 2, -1])
             target_labeled_labels = tf.slice(self.y, [options.minibatch_size // 2, 0], [options.minibatch_size // 4, -1])
             print("All labels: ", all_labels.shape)
             print("source labels: ", source_labels.shape)
             print("target labelled labels: ", target_labeled_labels.shape)
-            if self.train==True:
-                self.classify_labels = tf.concat([source_labels, target_labeled_labels], 0)
-            else:
-                self.classify_labels = all_labels
+            self.classify_labels = tf.cond(self.train, lambda: source_labels, lambda: all_labels)
+            
             weight = tf.get_variable("l_w1",
                                      shape=[options.hidden_size + options.hidden_size, options.numClasses],
                                      initializer=tf.contrib.layers.xavier_initializer(seed=101))
@@ -266,22 +262,22 @@ if __name__ == '__main__':
 
         for epoch in range(options.epochs):
             # randomly shuffle the source data
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(X_src)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(y_src)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(sequence_len['src_seq_len'])
             src_minibatches = mini_batches(X_src, y_src, seq_len=sequence_len['src_seq_len'],
                                            mini_batch_size=options.minibatch_size // 2)
             src_num_minibatches = len(src_minibatches)
 
             # randomly shuffle the target training data
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(X_train)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(y_train)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(sequence_len['train_seq_len'])
             target_train_minibatches = mini_batches(X_train, y_train, seq_len=sequence_len['train_seq_len'],
                                                     mini_batch_size=options.minibatch_size // 2)

@@ -228,9 +228,9 @@ if __name__ == '__main__':
 
         for epoch in range(options.epochs):
             # randomly shuffle the training data
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(X_train)
-            np.random.seed(2018)
+            np.random.seed(2018+epoch)
             np.random.shuffle(y_train)
 
             minibatch_cost = 0.
